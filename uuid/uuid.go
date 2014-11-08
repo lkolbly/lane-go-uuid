@@ -7,6 +7,7 @@ package uuid
 import (
 	"bytes"
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
 	"io"
 	"strings"
@@ -15,6 +16,26 @@ import (
 // A UUID is a 128 bit (16 byte) Universal Unique IDentifier as defined in RFC
 // 4122.
 type UUID []byte
+
+func (uuid UUID) MarshalJSON() ([]byte, error) {
+	return json.Marshal(uuid.String())
+}
+
+func (uuid *UUID) UnmarshalJSON(in []byte) error {
+	var str string
+	err := json.Unmarshal(in, &str)
+	if err != nil {
+		return err
+	}
+	*uuid = (*uuid)[:0]
+	id := Parse(str)
+	if id != nil {
+		*uuid = append(*uuid, id...)
+	} else {
+		// return an error here
+	}
+	return nil
+}
 
 // A Version represents a UUIDs version.
 type Version byte
